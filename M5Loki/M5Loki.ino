@@ -31,23 +31,53 @@
 #include "M5Loki_globals_04.inc"
 #include "M5Loki_prototypes.h"
 
+// Forward declaration for the theme-aware battery renderer used by later
+// implementation sections.
+void drawBatteryThemeAware();
+
 #include "M5Loki_impl_01.inc"
 
-// ------------------------------------------------------------------
-// Theme compatibility layer
-// Keep the original implementation available internally, then expose the
-// corrected v1.0 implementation to the rest of the firmware.
-// ------------------------------------------------------------------
+// Keep the old theme/status implementations internally, while later firmware
+// calls resolve to the corrected v1.0 functions defined at the end of this file.
 #define applyTheme applyTheme_legacy
 #define drawTopBar drawTopBar_legacy
 #include "M5Loki_impl_02.inc"
 #undef applyTheme
 #undef drawTopBar
 
+// M5Loki_impl_02.inc and M5Loki_impl_03.inc split the battery function across
+// the file boundary, so only preprocessor directives are placed between them.
+// All later battery refresh calls use the theme-aware renderer.
+#define drawBattery drawBatteryThemeAware
+#include "M5Loki_impl_03.inc"
+
+// Keep the old About implementation internally. Later menu calls resolve to
+// the final About screen defined at the end of this file.
+#define drawAbout drawAbout_legacy
+#include "M5Loki_impl_04.inc"
+#undef drawAbout
+
+#include "M5Loki_impl_05.inc"
+
+// Keep the original button handler internally. loop() in the next section
+// resolves to the final wrapper defined at the end of this file.
+#define handleButtons handleButtons_legacy
+#include "M5Loki_impl_06.inc"
+#undef handleButtons
+
+#include "M5Loki_impl_07.inc"
+
+#undef drawBattery
+
+// ============================================================================
+// FINAL v1.0 OVERRIDES
+// ============================================================================
+
 void applyTheme() {
   C_MAIN = LOKI_COLORS[colorIndex];
 
-  // Explicit colors make repeated Light/Dark switching deterministic.
+  // Explicit values keep repeated Light/Dark switching deterministic,
+  // including changing accent color while Light mode is active.
   if (lightMode) {
     C_BG = TFT_WHITE;
     C_TEXT = TFT_BLACK;
@@ -73,7 +103,6 @@ void drawBatteryThemeAware() {
   const int w = 28;
   const int h = 12;
 
-  // Battery background follows the active Dark/Light theme.
   StickCP2.Display.fillRect(x - 1, y - 1, 35, 15, C_BG);
   StickCP2.Display.drawRect(x, y, w, h, C_MAIN);
   StickCP2.Display.fillRect(x + w, y + 3, 3, 6, C_MAIN);
@@ -90,7 +119,7 @@ void drawBatteryThemeAware() {
 }
 
 void drawTopBar() {
-  // The full status bar now follows the selected theme dynamically.
+  // Status bar background follows Dark/Light mode dynamically.
   StickCP2.Display.fillRect(0, 0, 240, 24, C_BG);
 
   String t = clockText();
@@ -107,18 +136,6 @@ void drawTopBar() {
   drawBatteryThemeAware();
 }
 
-// From here onward, all normal battery refreshes use the theme-aware version.
-#define drawBattery drawBatteryThemeAware
-
-#include "M5Loki_impl_03.inc"
-
-// ------------------------------------------------------------------
-// Final About screen
-// ------------------------------------------------------------------
-#define drawAbout drawAbout_legacy
-#include "M5Loki_impl_04.inc"
-#undef drawAbout
-
 void drawAbout() {
   StickCP2.Display.fillScreen(C_BG);
   drawTopBar();
@@ -134,18 +151,9 @@ void drawAbout() {
   centerText("M5: back", 122, C_DIM);
 }
 
-#include "M5Loki_impl_05.inc"
-
-// ------------------------------------------------------------------
-// Birthday stop fix
-// Keep the original button handler internally and wrap it so the physical
-// M5 press always has first priority while the birthday melody is playing.
-// ------------------------------------------------------------------
-#define handleButtons handleButtons_legacy
-#include "M5Loki_impl_06.inc"
-#undef handleButtons
-
 void handleButtons() {
+  // Birthday gets highest priority. Any physical M5 press stops the melody
+  // immediately and leaves Loki on the Happy reaction.
   if (birthdayPlaying && StickCP2.BtnA.isPressed()) {
     stopBirthdaySong();
 
@@ -158,14 +166,10 @@ void handleButtons() {
     nextBlinkAt = millis() + random(2200, 4800);
     drawFace();
 
-    // Consume the same press so it cannot immediately start recording.
+    // Consume this press so it cannot immediately become hold-to-record.
     aHeld = true;
     return;
   }
 
   handleButtons_legacy();
 }
-
-#include "M5Loki_impl_07.inc"
-
-#undef drawBattery
