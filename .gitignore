@@ -1,0 +1,16 @@
+# M5Loki secrets
+M5Loki/config.h
+config.h
+
+# Arduino / build output
+build/
+*.bin
+*.elf
+*.map
+*.hex
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
