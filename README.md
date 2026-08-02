@@ -18,12 +18,13 @@ M5Loki turns an M5StickC Plus2 into a small voice-driven AI pet with English/Ara
 - Reactive faces: neutral, happy, love, surprised, sad, angry, sleep, dead
 - Recording waveform + fixed message/typing indicator
 - Birthday cake + buzzer melody
-- Press M5 during birthday music to stop immediately and return to Happy face
+- Press M5 during birthday music to stop immediately and return to the Happy face
 - On-device Wi-Fi scanner and password keyboard
 - Appearance menu with Color, Theme, and Brightness
-- Dynamic Dark/Light mode including the top status bar
+- Dynamic Dark/Light mode, including the status bar and battery area
 - Time + sharp 4-block battery indicator
 - Settings stored using ESP32 Preferences/NVS
+- No phone companion app required
 
 ## Hardware
 
@@ -32,24 +33,29 @@ M5Loki turns an M5StickC Plus2 into a small voice-driven AI pet with English/Ara
 - 2.4 GHz Wi-Fi
 - Your own Gemini API key
 
+## Quick start
+
+1. Download or clone the whole repository.
+2. Open `M5Loki/M5Loki.ino` in Arduino IDE.
+3. Paste **your own** Gemini API key near the top of `M5Loki.ino`.
+4. Install the required libraries.
+5. Choose your M5StickC Plus2 / ESP32 board and COM port.
+6. Verify and Upload.
+
+> The firmware is organized into internal `.inc` files to keep the project readable. **Normal users only edit `M5Loki.ino`.** Do not open or combine the `.inc` files manually.
+
 ## Arduino setup
 
-Install Arduino IDE 2.x and the required libraries:
+Install **Arduino IDE 2.x** and these libraries:
 
 - M5StickCPlus2
 - M5Unified
 - M5GFX
 - ArduinoJson
 
-Open:
+The project also uses standard ESP32/Arduino components such as Wi-Fi, HTTPClient, Preferences, mbedTLS/base64, and ESP32 heap utilities.
 
-```text
-M5Loki/M5Loki.ino
-```
-
-Choose your M5StickC Plus2 / ESP32 board and COM port, then Verify and Upload.
-
-> M5Loki contains embedded English and Arabic bitmap fonts, so compilation may take longer than a small Arduino sketch.
+> M5Loki contains embedded English and Arabic bitmap fonts, so compilation can take longer than a small Arduino sketch. This is normal.
 
 ## Gemini API key — every user must use their own key
 
@@ -85,38 +91,37 @@ https://ai.google.dev/gemini-api/docs/api-key
 
 > Never publish a real API key. The example/screenshot is intentionally censored.
 
-### 2. Paste your key directly in M5Loki.ino
+### 2. Paste your key in M5Loki.ino
 
-Near the top of `M5Loki.ino`, find:
+Near the top of `M5Loki/M5Loki.ino`, find:
 
 ```cpp
 // ===================== USER CONFIG ======================
 #define GEMINI_API_KEY "PASTE_YOUR_GEMINI_API_KEY_HERE"
+// ========================================================
 ```
 
-Replace only the text between the quotation marks:
+Replace only the placeholder text between the quotation marks:
 
 ```cpp
 #define GEMINI_API_KEY "YOUR_COMPLETE_GEMINI_API_KEY"
 ```
 
-Keep the quotation marks. Do not add spaces inside the key.
-
-This keeps setup simple: **no separate secret/config file is required to compile M5Loki.**
+Keep the quotation marks and do not add spaces inside the key.
 
 If you fork or publish your modified firmware, remove your real key first and restore the placeholder.
 
 ## Gemini model
 
-The firmware uses the tested lightweight default:
+The firmware uses the lightweight tested default:
 
 ```cpp
 const char* GEMINI_MODEL = "gemini-flash-lite-latest";
 ```
 
-Flash-Lite is a good match for M5Loki because the goal is fast, short pet-style voice interactions rather than long reasoning responses.
+Flash-Lite is a good fit for M5Loki because the goal is fast, short pet-style voice interaction rather than long reasoning responses.
 
-Before changing the model, check Google's current model documentation because aliases, quotas, and model availability can change:
+Model names, quotas, and availability can change, so check Google's current documentation before changing the model:
 
 https://ai.google.dev/gemini-api/docs/models
 
@@ -191,13 +196,13 @@ Available accent colors:
 - Yellow
 - Orange
 
-Dark/Light mode changes the full interface, including the status bar.
+Dark/Light mode changes the whole interface, including the top status bar and battery background.
 
 ## Wi-Fi
 
 Wi-Fi setup is completely on-device:
 
-1. Open Menu → Wi-Fi.
+1. Open **Menu → Wi-Fi**.
 2. Select your network.
 3. Enter the password using the on-device keyboard.
 4. Select **CONNECT**.
@@ -215,6 +220,21 @@ Arabic speech  → Arabic reply
 
 Arabic rendering includes contextual shaping and RTL display. Western digits `0-9` are used in both languages.
 
+## About screen
+
+The firmware About page shows:
+
+```text
+M5LOKI
+AI Pet Firmware
+for M5StickC Plus2
+
+by Fahad AlAjmi
+GitHub: @faajmid
+
+v1.0
+```
+
 ## HTTP 429 / RESOURCE_EXHAUSTED
 
 If Gemini returns:
@@ -230,24 +250,42 @@ check your Google AI Studio **Usage**, **Rate Limit**, and billing/free-tier quo
 ```text
 M5Loki/
 ├── M5Loki/
-│   ├── M5Loki.ino
-│   ├── config.h
-│   ├── M5Loki_prototypes.h
-│   ├── M5Loki_globals_*.inc
-│   └── M5Loki_impl_*.inc
+│   ├── M5Loki.ino              # Open/edit this file
+│   ├── config.h                 # Internal compatibility header; do not edit
+│   ├── M5Loki_prototypes.h     # Internal declarations
+│   ├── M5Loki_globals_*.inc    # Internal state + embedded fonts
+│   └── M5Loki_impl_*.inc       # Internal firmware implementation
 ├── docs/
-│   └── images/
+│   └── images/                  # Setup illustrations / project media
+├── .gitignore
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── README.md
 └── SECURITY.md
 ```
 
-`config.h` is only a compatibility header for the modular Arduino source. **The user API key is entered directly in `M5Loki.ino`.**
+### Why is the firmware split into `.inc` files?
+
+The full source is large because it contains embedded 16 px English and Arabic bitmap fonts. Splitting the implementation keeps GitHub easier to browse and maintain.
+
+For a normal user, it still behaves like one Arduino project:
+
+```text
+Open M5Loki.ino
+→ paste your API key
+→ compile
+→ upload
+```
+
+Arduino resolves the included files automatically because they live in the same sketch folder.
 
 ## Security note
 
 An API key compiled into microcontroller firmware should be treated as a device credential, not as a perfectly secret server-side credential. This setup is appropriate for personal/open-source experimentation. For a commercial product, use a backend/proxy architecture so reusable cloud credentials are not distributed in firmware.
+
+## Contributing
+
+Bug fixes, documentation improvements, UI refinements, additional semantic reactions, and embedded-system optimizations are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
