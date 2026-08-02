@@ -1,13 +1,34 @@
 /*
   M5Loki - Open-Source AI Pet Firmware for M5StickC Plus2
-  Main Arduino sketch entry point.
+  ---------------------------------------------------------
 
-  Copy config.example.h to config.h and add YOUR OWN Gemini API key.
-  Never commit config.h.
+  Author: Fahad AlAjmi
+  Email: faajmid@gmail.com
+  GitHub: https://github.com/faajmid
+  Instagram: @faajmid
+  TikTok: @faajmid
 
-  v8.0 fixes:
+  License: MIT
+
+  IMPORTANT:
+  Paste YOUR OWN Gemini API key below before uploading.
+  Never publish or share a real API key.
+*/
+
+// ===================== USER CONFIG ======================
+// Get your key from: https://aistudio.google.com/
+#define GEMINI_API_KEY "PASTE_YOUR_GEMINI_API_KEY_HERE"
+
+// Tested/default lightweight model for M5Loki.
+#define M5LOKI_GEMINI_MODEL "gemini-flash-lite-latest"
+// =======================================================
+
+/*
+  v8.1 fixes:
+  - No separate config.h is required from the user.
   - M5 immediately stops the birthday melody and returns to Happy face.
-  - Status bar now follows Light/Dark theme dynamically.
+  - Status bar follows Light/Dark theme dynamically.
+  - About page includes project/author details.
 */
 
 #include "M5Loki_globals_01.inc"
@@ -17,16 +38,14 @@
 #include "M5Loki_prototypes.h"
 #include "M5Loki_impl_01.inc"
 
-// Keep the original implementations available internally, then provide
-// corrected public versions below. This avoids duplicating the large
-// embedded font/source files in the repository.
+// Keep legacy theme/top-bar implementations internally, then use the
+// corrected versions below.
 #define applyTheme m5lokiLegacyApplyTheme
 #define drawTopBar m5lokiLegacyDrawTopBar
 #include "M5Loki_impl_02.inc"
 #undef drawTopBar
 #undef applyTheme
 
-// Correct, deterministic theme handling.
 void applyTheme() {
   C_MAIN = LOKI_COLORS[colorIndex];
 
@@ -41,8 +60,6 @@ void applyTheme() {
   }
 }
 
-// Draw the battery directly in the status bar so its background always
-// matches the selected Light/Dark theme.
 void drawTopBarBattery() {
   int pct = batteryPercent();
 
@@ -72,7 +89,6 @@ void drawTopBarBattery() {
   }
 }
 
-// Status bar background follows the whole UI theme.
 void drawTopBar() {
   StickCP2.Display.fillRect(0, 0, 240, 24, C_BG);
 
@@ -91,13 +107,32 @@ void drawTopBar() {
 }
 
 #include "M5Loki_impl_03.inc"
+
+// Keep the old About page internally and replace it with the final one.
+#define drawAbout m5lokiLegacyDrawAbout
 #include "M5Loki_impl_04.inc"
+#undef drawAbout
+
+void drawAbout() {
+  StickCP2.Display.fillScreen(C_BG);
+  drawTopBar();
+
+  centerText("M5LOKI", 29, C_MAIN);
+  centerText("AI Pet Firmware", 45, C_TEXT);
+  centerText("for M5StickC Plus2", 59, C_TEXT);
+
+  centerText("by Fahad AlAjmi", 76, C_MAIN);
+  centerText("GitHub: @faajmid", 90, C_TEXT);
+
+  centerText("v1.0", 104, C_DIM);
+  centerText("M5: back", 122, C_DIM);
+}
+
 #include "M5Loki_impl_05.inc"
 #include "M5Loki_impl_06.inc"
 
 // Keep the original loop body, but wrap it with a highest-priority
-// birthday-stop check. Using isPressed() makes this reliable even if a
-// one-frame click/press event is missed while audio is playing.
+// birthday-stop check.
 #define loop m5lokiOriginalLoop
 #include "M5Loki_impl_07.inc"
 #undef loop
@@ -117,8 +152,7 @@ void loop() {
     nextBlinkAt = millis() + random(2200, 4800);
     drawFace();
 
-    // Consume this press completely so it cannot immediately trigger
-    // hold-to-record after stopping the birthday song.
+    // Consume this press so it cannot immediately start a recording.
     while (StickCP2.BtnA.isPressed()) {
       StickCP2.update();
       delay(5);
