@@ -2,38 +2,38 @@
 
 **Open-source AI pet firmware for M5StickC Plus2.**
 
-M5Loki turns an M5StickC Plus2 into a small voice-driven AI pet with bilingual English/Arabic conversations, expressive reactions, on-device Wi-Fi setup, appearance settings, battery/time status, and playful special actions.
+M5Loki turns an M5StickC Plus2 into a small voice-driven AI pet with English/Arabic conversations, expressive reactions, on-device Wi-Fi setup, appearance settings, time/battery status, and playful special actions.
 
 <p align="center">
-  <img src="docs/images/m5loki-demo-placeholder.png" alt="M5Loki demo placeholder" width="700">
+  <img src="docs/images/m5loki-demo-placeholder.svg" alt="M5Loki" width="700">
 </p>
 
-> Replace the placeholder above with your own photo or GIF before publishing the repository.
+> Replace the demo placeholder with a photo or GIF of your own M5Loki build if you fork the project.
 
-## Highlights
+## Features
 
-- Voice recording directly from the M5StickC Plus2 microphone
-- Gemini-powered understanding and short replies
+- Voice recording from the M5StickC Plus2 microphone
+- Gemini-powered speech understanding and short pet-style replies
 - Automatic English / Arabic language detection
-- Custom Arabic shaping and RTL rendering
-- Matched embedded English and Arabic reply fonts
-- Reactive Loki faces: neutral, happy, love, surprised, sad, angry, sleep, dead
-- Recording waveform and fixed typing/message indicator
-- Birthday special action with cake + buzzer melody
+- Custom Arabic shaping + RTL rendering
+- Matched embedded 16 px English and Arabic reply fonts
+- Reactive faces: neutral, happy, love, surprised, sad, angry, sleep, dead
+- Recording waveform + fixed typing/message indicator
+- Birthday action with cake + buzzer melody
 - On-device Wi-Fi scanner and password keyboard
-- Appearance menu with color, theme, and brightness
-- Time + 4-block battery indicator
-- Settings saved in ESP32 Preferences / NVS
+- Appearance menu: color, dark/light theme, brightness
+- Time + sharp 4-block battery indicator
+- Persistent settings using ESP32 Preferences/NVS
 - No phone companion app required
 
 ## Hardware
 
 - **M5StickC Plus2**
 - USB-C cable
-- 2.4 GHz Wi-Fi connection
-- Gemini API key
+- 2.4 GHz Wi-Fi
+- Your own Gemini API key
 
-## Interaction
+## Controls
 
 | Action | Control |
 |---|---|
@@ -42,39 +42,25 @@ M5Loki turns an M5StickC Plus2 into a small voice-driven AI pet with bilingual E
 | Show reaction | Click **M5** after a normal reply |
 | Stop birthday melody | Press **M5** |
 | Open menu | Top side button |
-| Move through menus | Top / bottom side buttons |
+| Navigate | Top / bottom side buttons |
 | Select | M5 |
 
-Normal conversation flow:
+Normal flow:
 
 ```text
-Hold M5
-  ↓
-Recording waveform
-  ↓
-Release
-  ↓
-Typing indicator
-  ↓
-Loki reply
-  ↓
-Click M5
-  ↓
-Reaction face
+Hold M5 → Recording → Release → Typing → Loki reply → Click M5 → Reaction
 ```
 
 Birthday flow:
 
 ```text
-"It's my birthday"
-"Play birthday music"
-"اليوم عيد ميلادي"
-        ↓
-Birthday cake + melody
-        ↓
-Press M5 anytime
-        ↓
-Happy Loki face
+"It's my birthday" / "Play birthday music" / "اليوم عيد ميلادي"
+                    ↓
+             Cake + birthday melody
+                    ↓
+               Press M5 anytime
+                    ↓
+                Happy Loki face
 ```
 
 ## Repository structure
@@ -82,13 +68,15 @@ Happy Loki face
 ```text
 M5Loki/
 ├── M5Loki/
-│   ├── M5Loki.ino
-│   └── config.example.h
-├── docs/
-│   └── images/
-│       ├── google-ai-studio-api-keys.png
-│       ├── google-ai-studio-api-key-details-censored.png
-│       └── m5loki-demo-placeholder.png
+│   ├── M5Loki.ino                 # Arduino sketch entry point
+│   ├── config.example.h           # API-key template
+│   ├── M5Loki_prototypes.h
+│   ├── M5Loki_globals_01.inc ...  # Embedded fonts + global state
+│   └── M5Loki_impl_01.inc ...     # Firmware implementation
+├── docs/images/
+│   ├── google-ai-studio-api-keys.svg
+│   ├── google-ai-studio-api-key-details-censored.svg
+│   └── m5loki-demo-placeholder.svg
 ├── .gitignore
 ├── CONTRIBUTING.md
 ├── LICENSE
@@ -96,81 +84,52 @@ M5Loki/
 └── SECURITY.md
 ```
 
+The firmware is split into small include files only to keep the repository manageable. Open **`M5Loki/M5Loki.ino`** in Arduino IDE; it includes the remaining firmware files automatically.
+
 ## 1. Arduino setup
 
-Install the **Arduino IDE 2.x**.
-
-Add ESP32 board support and select the correct ESP32/M5StickC Plus2 board configuration for your installation.
+Install **Arduino IDE 2.x**, add ESP32 board support, and select the correct M5StickC Plus2 / ESP32 board and port for your setup.
 
 Install these libraries from Arduino Library Manager:
 
-- **M5StickCPlus2**
-- **M5Unified**
-- **M5GFX**
-- **ArduinoJson**
+- `M5StickCPlus2`
+- `M5Unified`
+- `M5GFX`
+- `ArduinoJson`
 
-The firmware also uses standard ESP32/Arduino components such as Wi-Fi, HTTP client, Preferences, and mbedTLS/base64 support.
+The firmware also uses standard ESP32 libraries for Wi-Fi, HTTPS, Preferences, and base64 handling.
 
-## 2. Create a Gemini API key
+## 2. Get your own Gemini API key
 
-M5Loki uses the Gemini API through **Google AI Studio**.
+Every M5Loki user should use **their own API key**. No API key is included in this repository.
 
-1. Go to **Google AI Studio**: https://aistudio.google.com/
+1. Open **Google AI Studio**: https://aistudio.google.com/
 2. Sign in.
-3. In the left sidebar, open **API Keys**.
-4. Click **Create API key** at the top-right if you do not already have one.
-5. Choose/create the Google Cloud project you want to use.
-6. Open the created key.
-7. Click **Copy key**.
-8. Keep that value private.
+3. Open **API Keys** from the left sidebar.
+4. Click **Create API key**.
+5. Choose or create the Google Cloud project you want to use.
+6. Open the new key and click **Copy key**.
+7. Keep the key private.
 
-Google's official API-key guide:
-
-- https://ai.google.dev/gemini-api/docs/api-key
+Official guide: https://ai.google.dev/gemini-api/docs/api-key
 
 ### API Keys page
 
 <p align="center">
-  <img src="docs/images/google-ai-studio-api-keys.png" alt="Google AI Studio API Keys page" width="850">
+  <img src="docs/images/google-ai-studio-api-keys.svg" alt="Google AI Studio API Keys page guide" width="850">
 </p>
 
-### Key details
+### API key details
 
 <p align="center">
-  <img src="docs/images/google-ai-studio-api-key-details-censored.png" alt="Google AI Studio API key details with key censored" width="700">
+  <img src="docs/images/google-ai-studio-api-key-details-censored.svg" alt="Censored Google AI Studio API key example" width="700">
 </p>
 
-> The API key in the screenshot is covered on purpose. **Never upload or share a real API key.**
+> The red bar represents a censored key. **Never publish or commit your real API key.**
 
-### Put the key in M5Loki
+## 3. Add your key to M5Loki
 
-Create:
-
-```text
-M5Loki/config.h
-```
-
-and write:
-
-```cpp
-#pragma once
-
-#define GEMINI_API_KEY "PASTE_YOUR_GEMINI_API_KEY_HERE"
-```
-
-The line should have this structure:
-
-```cpp
-#define GEMINI_API_KEY "your-complete-key-goes-between-these-quotes"
-```
-
-Do not add spaces inside the key, do not remove the quotation marks, and do not publish `config.h`.
-
-## 3. Configure your API key safely
-
-The repository intentionally does **not** include `config.h`.
-
-Copy:
+Inside the `M5Loki` sketch folder, copy:
 
 ```text
 config.example.h
@@ -182,26 +141,59 @@ and rename the copy to:
 config.h
 ```
 
-Then replace:
+Then edit `config.h`:
 
 ```cpp
+#pragma once
+
 #define GEMINI_API_KEY "PASTE_YOUR_GEMINI_API_KEY_HERE"
 ```
 
-with your own key.
+Your real line should have this structure:
 
-`config.h` is ignored by `.gitignore`, which helps prevent accidental API-key commits.
+```cpp
+#define GEMINI_API_KEY "your-complete-private-key-goes-here"
+```
 
-### Never publish your API key
+Do not remove the quotation marks and do not add spaces inside the key.
 
-If you accidentally push a real key to GitHub:
+`config.h` is intentionally listed in `.gitignore`, so each user keeps their own key locally.
 
-1. Revoke/delete the exposed key in Google AI Studio.
-2. Create a new key.
-3. Update your local `config.h`.
-4. Do not rely only on deleting the key from the latest Git commit; secrets can remain in repository history.
+### If you accidentally expose a key
 
-## 4. Open and upload M5Loki
+Revoke/delete it in Google AI Studio immediately, create a replacement, and update your local `config.h`. Removing a secret only from the newest Git commit is not enough because it may remain in Git history.
+
+## 4. Choose the Gemini model
+
+The firmware currently uses the model that was tested during development:
+
+```cpp
+const char* GEMINI_MODEL = "gemini-flash-lite-latest";
+```
+
+This is the easiest starting point for M5Loki. Because a `latest` alias can change over time, you can instead pin a currently supported stable Flash-Lite model.
+
+As of July 2026, Google lists:
+
+```cpp
+const char* GEMINI_MODEL = "gemini-3.5-flash-lite";
+```
+
+as a stable Flash-Lite model with audio input and structured-output support.
+
+Check Google's current model documentation before changing the string:
+
+- https://ai.google.dev/gemini-api/docs/models
+- https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite
+
+| Choice | Use it when |
+|---|---|
+| `gemini-flash-lite-latest` | You want the tested M5Loki default / latest Flash-Lite alias |
+| `gemini-3.5-flash-lite` | You want a pinned stable Flash-Lite model |
+
+M5Loki is designed around quick, short interactions, so a Flash-Lite model is a better fit than a large reasoning model.
+
+## 5. Upload the firmware
 
 Open:
 
@@ -209,17 +201,13 @@ Open:
 M5Loki/M5Loki.ino
 ```
 
-in Arduino IDE.
+Connect the M5StickC Plus2 by USB-C, select the correct board and port, then **Verify** and **Upload**.
 
-Connect the M5StickC Plus2 via USB-C, choose the correct board and port, then **Verify** and **Upload**.
+Compilation can take longer than a small Arduino sketch because M5Loki embeds custom English and Arabic bitmap fonts. If flashing itself is slow, a higher ESP32 upload speed such as `921600` may help when your USB connection is stable.
 
-The sketch contains embedded Arabic and English bitmap fonts, so compilation can take longer than a small Arduino sketch. This is normal.
+## 6. Connect Wi-Fi
 
-If upload itself is slow, a higher ESP32 upload speed such as **921600** may help when your USB connection is stable.
-
-## 5. Connect Wi-Fi
-
-Open Loki's menu with the top side button:
+Open the top-button menu:
 
 ```text
 Wi-Fi
@@ -229,19 +217,11 @@ About
 Back
 ```
 
-Select **Wi-Fi**, choose your network, type the password using the on-device keyboard, then select **CONNECT**.
+Select **Wi-Fi**, choose your network, enter the password using the on-device keyboard, then choose **CONNECT**. Wi-Fi credentials are stored locally in ESP32 Preferences/NVS for automatic reconnection.
 
-Credentials are stored in ESP32 Preferences/NVS for automatic reconnection.
+## 7. Appearance
 
-## 6. Appearance
-
-Inside:
-
-```text
-Appearance
-```
-
-you can configure:
+Inside **Appearance**:
 
 ```text
 Color
@@ -250,127 +230,32 @@ Brightness
 Back
 ```
 
-Included accent colors:
+Available accent colors are Cyan, Green, Magenta, Yellow, and Orange. The device also supports dark/light mode and persistent brightness control.
 
-- Cyan
-- Green
-- Magenta
-- Yellow
-- Orange
+## 8. English and Arabic
 
-The status bar shows:
-
-```text
-TIME            LOKI            BATTERY
-```
-
-with a sharp 4-block battery indicator.
-
-## 7. Language support
-
-M5Loki dynamically follows the spoken language.
+Loki automatically follows the spoken language:
 
 ```text
 English speech → English reply
 Arabic speech  → Arabic reply
 ```
 
-Arabic rendering uses:
+Arabic rendering includes UTF-8 decoding, contextual shaping, RTL visual ordering, and embedded Arabic glyphs. Western digits `0-9` are used in both languages.
 
-- UTF-8 decoding
-- Arabic contextual shaping
-- RTL visual ordering
-- Embedded Arabic glyphs
+## 9. HTTP 429 / quota errors
 
-Western digits `0-9` are used in both languages.
-
-## 8. Choose the Gemini model
-
-M5Loki currently defaults to:
-
-```cpp
-const char* GEMINI_MODEL = "gemini-flash-lite-latest";
-```
-
-This is the model alias tested with this firmware and is the recommended starting point for M5Loki.
-
-### Option A — tested M5Loki default
-
-```cpp
-const char* GEMINI_MODEL = "gemini-flash-lite-latest";
-```
-
-`gemini-flash-lite-latest` is the alias tested with this project. Because `latest` aliases can move to newer releases, if it becomes unavailable or behaves differently, switch to a pinned stable Flash-Lite model.
-
-### Option B — pin a stable Flash-Lite model
-
-Google currently lists **Gemini 3.5 Flash-Lite** as a stable, low-latency model with audio input and structured output support:
-
-```cpp
-const char* GEMINI_MODEL = "gemini-3.5-flash-lite";
-```
-
-Before changing the model, check the official Gemini model page because model names, quotas, and deprecation dates can change.
-
-Official model documentation:
-
-- https://ai.google.dev/gemini-api/docs/models
-- https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite
-
-### Which model should I use?
-
-| Model choice | Best for |
-|---|---|
-| `gemini-flash-lite-latest` | Tested default for M5Loki; easiest starting point |
-| `gemini-3.5-flash-lite` | A pinned stable Flash-Lite model |
-| Full Flash models | More capability, but usually unnecessary for Loki's short pet-style interactions |
-
-M5Loki does **not** need a large reasoning model. The goal is a short, responsive pet-like conversation, so Flash-Lite is the natural fit.
-
-## 9. Quota / HTTP 429
-
-If Loki works once and then shows:
+If you see:
 
 ```text
 429 RESOURCE_EXHAUSTED
 ```
 
-your Gemini project has reached a quota or rate limit.
+check **Usage**, **Rate Limit**, and billing/free-tier status in Google AI Studio. This normally indicates Gemini quota/rate limiting rather than a microphone or M5Stick hardware failure.
 
-Check **Usage**, **Rate Limit**, and your billing/free-tier status in Google AI Studio. Waiting for the quota window to reset or using a project with sufficient quota may be required.
+## Security note
 
-The error is not necessarily a microphone or M5Stick hardware failure.
-
-## 10. Customization
-
-Useful places to customize in `M5Loki.ino` include:
-
-- Loki's Gemini personality/system instruction
-- Reaction behavior
-- Accent colors
-- Menu items
-- Birthday melody
-- UI geometry
-- Brightness limits
-- Reply length
-- Face shapes
-
-The reply fonts are embedded bitmap fonts. Changing their pixel size requires regenerating the font data rather than simply calling `setTextSize()`.
-
-## API-key security note
-
-This project runs on a microcontroller, so any API key stored in flashed firmware should be treated as a device credential rather than a perfectly secret server-side credential.
-
-For personal/open-source experimentation, the local `config.h` workflow is simple and practical. For a commercial or widely distributed product, use a backend/proxy or another architecture that does not distribute a reusable cloud API credential in client firmware.
-
-## Roadmap ideas
-
-- Optional on-device API-key entry
-- Conversation history
-- Additional semantic actions
-- More sound themes
-- OTA firmware updates
-- Optional local/offline AI integrations
+This is microcontroller firmware, so a key stored in flashed firmware should not be treated like a perfectly protected server-side secret. The local `config.h` workflow is suitable for personal/open-source experimentation. For a commercial product, prefer a backend/proxy architecture that does not distribute a reusable cloud credential to client devices.
 
 ## Contributing
 
@@ -378,9 +263,7 @@ Issues, fixes, documentation improvements, UI ideas, and new reactions are welco
 
 ## License
 
-M5Loki is released under the **MIT License**. See [LICENSE](LICENSE).
-
-You may use, modify, study, and redistribute the project under the terms of that license.
+M5Loki is open source under the **MIT License**. See [LICENSE](LICENSE).
 
 ## Author
 
@@ -390,7 +273,3 @@ You may use, modify, study, and redistribute the project under the terms of that
 - Instagram: [@faajmid](https://instagram.com/faajmid)
 - TikTok: [@faajmid](https://www.tiktok.com/@faajmid)
 - Email: [faajmid@gmail.com](mailto:faajmid@gmail.com)
-
----
-
-If you build your own Loki, consider sharing a photo or improvement with the project.
